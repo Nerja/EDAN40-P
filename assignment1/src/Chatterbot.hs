@@ -103,10 +103,19 @@ reductionsApply _ = id
 -- Match and substitute
 --------------------------------------------------------
 
--- Replaces a wildcard in a list with the list given as the third argument
+-- | Replaces all occurrences of wildcard in a list with the list given
+--   as the third argument
+--
+-- Examples:
+--
+-- >>> substitute 'x' "x^2 + e^x + (2 + x + 2) - x" "1337"
+-- "1337^2 + e^1337 + (2 + 1337 + 2) - 1337"
+-- >>> substitute 1 [1,2,3,1,2] [0]
+-- [0,2,3,0,2]
 substitute :: Eq a => a -> [a] -> [a] -> [a]
-substitute _ _ _ = []
-{- TO BE WRITTEN -}
+substitute wildcard t s = foldr selector [] t
+  where selector x acc | x == wildcard     = s ++ acc
+                       | otherwise         = x : acc
 
 
 -- Tries to match two lists. If they match, the result consists of the sublist

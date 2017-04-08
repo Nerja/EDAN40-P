@@ -66,7 +66,7 @@ present :: Phrase -> String
 present = unwords
 
 prepare :: String -> Phrase
-prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|") 
+prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
 rulesCompile :: [(String, [String])] -> BotBrain
 {- TO BE WRITTEN -}
@@ -127,15 +127,14 @@ longerWildcardMatch (wc:ps) (x:xs) = Nothing
 
 -- Test cases --------------------
 
-testPattern =  "a=*;"
-testSubstitutions = "32"
-testString = "a=32;"
+--testPattern =  "a=*;"
+--testSubstitutions = "32"
+--testString = "a=32;"
 
-substituteTest = substitute '*' testPattern testSubstitutions
-substituteCheck = substituteTest == testString
+--substituteCheck = substituteTest == testString
 
-matchTest = match '*' testPattern testString
-matchCheck = matchTest == Just testSubstitutions
+--matchTest = match '*' testPattern testString
+--matchCheck = matchTest == Just testSubstitutions
 
 
 
@@ -153,5 +152,3 @@ transformationApply _ _ _ _ = Nothing
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
 transformationsApply _ _ _ _ = Nothing
 {- TO BE WRITTEN -}
-
-

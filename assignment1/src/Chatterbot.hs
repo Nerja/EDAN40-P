@@ -118,19 +118,53 @@ substitute wildcard t s = foldr selector [] t
                        | otherwise         = x : acc
 
 
--- Tries to match two lists. If they match, the result consists of the sublist
--- bound to the wildcard in the pattern list.
+-- | Tries to match two lists. The first parameter is the wildcard used in
+--   matching. The second parameter is the pattern list that is used for matching.
+--   The third parameter is the list in which the function looks for the pattern.
+--   If a match is found then a sublist bound to the first occurrence of wildcard
+--   in the pattern list is returned. If no match is found Nothing is returned.
+--
+--   Examples:
+--
+--   >>> match '*' "Hello*" "World"
+--   Nothing
+--   >>> match '*' "Lund *" "Lund University"
+--   Just "University"
+--   >>> match '*' "Lund *" "Gote University"
+--   Nothing
 match :: Eq a => a -> [a] -> [a] -> Maybe [a]
-match _ _ _ = Nothing
-{- TO BE WRITTEN -}
+match _ [] [] = Just []
+match _ [] _  = Nothing
+match _ _ []  = Nothing
+match wildcard (p:ps) (s:ss)
+    | p /= wildcard && p /= s           = Nothing
+    | p /= wildcard && p == s           = match wildcard ps ss
+    | otherwise                         = orElse swm lwm
+  where swm = singleWildcardMatch wildcard (p:ps) (s:ss)
+        lwm = longerWildcardMatch wildcard (p:ps) (s:ss)
 
+-- | Helper function for matching. This considers the cast where wc must be equal
+--   to wildcard. Returns the wildcard bound to the first element in the search list
+--   if the rest of the two lists matches. Returns Nothing otherwise.
+--
+--   Examples:
+--
+--   >>> singleWildcardMatch '*' "*do" "bdo"
+--   Just "b"
+--   >>> singleWildcardMatch '*' "*do" "dobedo"
+--   Nothing
+singleWildcardMatch :: Eq a => a -> [a] -> [a] -> Maybe [a]
+singleWildcardMatch wildcard (wc:ps) (x:xs) = mmap (\_ -> [x]) $ match wildcard ps xs
 
--- Helper function to match
-singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs) = Nothing
-{- TO BE WRITTEN -}
-longerWildcardMatch (wc:ps) (x:xs) = Nothing
-{- TO BE WRITTEN -}
+-- | Helper function for matching. Considers the case where the wildcard is
+--   bound to x appended to possible more elements found by calling match.
+--
+--   Examples:
+--
+--   >>> longerWildcardMatch '*' "*do" "dobedo"
+--   Just "dobe"
+longerWildcardMatch :: Eq a => a -> [a] -> [a] -> Maybe [a]
+longerWildcardMatch wildcard ps (x:xs) = mmap (x:) $ match wildcard ps xs
 
 
 

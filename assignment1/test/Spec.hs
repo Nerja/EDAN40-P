@@ -1,6 +1,7 @@
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
+import Data.List.Utils
 import Chatterbot
 
 -- Tests for the substitute function
@@ -58,9 +59,19 @@ unitTests = testGroup "All unit tests"
     , longerWildcardMatchTest
   ]
 
+substituteAlt :: Char -> [Char] -> [Char] -> Bool
+substituteAlt wild list rep = substitute wild list rep == replace [wild] rep list
+
+propertyTests :: TestTree
+propertyTests = testGroup "All property tests"
+  [
+    testProperty "substitute same as MissingH replace" substituteAlt
+  ]
+
 allTests = testGroup "All tests"
   [
-    unitTests
+      unitTests
+    , propertyTests
   ]
 
 main = defaultMain allTests

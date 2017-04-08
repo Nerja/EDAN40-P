@@ -186,13 +186,28 @@ longerWildcardMatch wildcard ps (x:xs) = mmap (x:) $ match wildcard ps xs
 -- Applying patterns
 --------------------------------------------------------
 
--- Applying a single pattern
+-- | Tries to find a match between the from template and the
+--   input m.a.p wildcard. If a match is found the result is
+--   inserted into the to template and the result is returned.
+--   If no match is found nothing is returned.
+--
+--   Examples:
+--
+--   >>> transformationApply '*' id "My name is Zacharias" ("My name is *", "Je m'appelle *")
+--   Just "Je m'appelle Zacharias"
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply _ _ _ _ = Nothing
-{- TO BE WRITTEN -}
+transformationApply wildcard func input transPair = mmap ((substitute wildcard substitute_template).func) matchResult
+  where matchResult           = match wildcard search_template input
+        substitute_template   = snd transPair
+        search_template       = fst transPair
 
 
--- Applying a list of patterns until one succeeds
+-- | Tries to apply a list of pattern transformations on the input.
+--   If a pattern transformation is successful the result is returned without
+--   trying to apply the rest. If no pattern transformation is successful then Nothing is returned.
+--
+--   Examples:
+--
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply _ _ _ _ = Nothing
-{- TO BE WRITTEN -}
+transformationsApply wildcard func transformations input = foldl doApply Nothing transformations
+  where doApply acc x = orElse acc $ transformationApply wildcard func input x

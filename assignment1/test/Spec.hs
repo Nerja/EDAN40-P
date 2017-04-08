@@ -50,6 +50,29 @@ longerWildcardMatchTest = testGroup "Unit tests for longerWildcardMatch"
   , testCase "Case 3, instructions" $ longerWildcardMatch '*' "*do" "bedobe" @?= Nothing
   ]
 
+frenchPresentation = ("My name is *", "Je m'appelle *")
+transformationApplyTest :: TestTree
+transformationApplyTest = testGroup "Unit tests for transformationApply"
+  [
+      testCase "Given testcase in instructions" $ transformationApply '*' id "My name is Zacharias" frenchPresentation
+        @?= Just "Je m'appelle Zacharias"
+    , testCase "Testcase from testfile" $ transformationApply '*' id "My shoe size is 45" frenchPresentation
+        @?= Nothing
+  ]
+
+swedishPresentation = ("My name is *", "Mitt namn är *")    
+presentations = [frenchPresentation, swedishPresentation]
+transformationsApplyTest :: TestTree
+transformationsApplyTest = testGroup "Unit tests for transformationsApply"
+  [
+      testCase "Given testcase nbr1" $ transformationsApply '*' id presentations "My name is Zacharias"
+        @?= Just "Je m'appelle Zacharias"
+    , testCase "Given testcase nbr2" $ transformationsApply '*' id (reverse presentations) "My name is Zacharias"
+        @?= Just "Mitt namn är Zacharias"
+    , testCase "Given testcase nbr3" $ transformationsApply '*' id (reverse presentations) "My shoe size is 45"
+        @?= Nothing
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -57,6 +80,8 @@ unitTests = testGroup "All unit tests"
     , matchTest
     , singleWildcardMatchTest
     , longerWildcardMatchTest
+    , transformationApplyTest
+    , transformationsApplyTest
   ]
 
 substituteAlt :: Char -> [Char] -> [Char] -> Bool

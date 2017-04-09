@@ -28,7 +28,7 @@ script:
   - stack test
   - stack exec doctest src/Utilities.hs
   - stack exec doctest src/Chatterbot.hs
-  - cd andy/assignment1
+  - cd ../andy/assignment1
   - stack build
   - stack haddock
   - stack test

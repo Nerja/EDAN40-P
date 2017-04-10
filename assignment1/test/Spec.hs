@@ -60,7 +60,7 @@ transformationApplyTest = testGroup "Unit tests for transformationApply"
         @?= Nothing
   ]
 
-swedishPresentation = ("My name is *", "Mitt namn är *")    
+swedishPresentation = ("My name is *", "Mitt namn är *")
 presentations = [frenchPresentation, swedishPresentation]
 transformationsApplyTest :: TestTree
 transformationsApplyTest = testGroup "Unit tests for transformationsApply"
@@ -73,6 +73,13 @@ transformationsApplyTest = testGroup "Unit tests for transformationsApply"
         @?= Nothing
   ]
 
+reflectTest :: TestTree
+reflectTest = testGroup "Unit tests for transformationsApply"
+  [
+      testCase "Given reflect test" $ reflect ["i", "will", "never", "see", "my", "reflection", "in", "your", "eyes"]
+          @?= ["you", "will", "never", "see", "your", "reflection", "in", "my", "eyes"]
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -82,6 +89,7 @@ unitTests = testGroup "All unit tests"
     , longerWildcardMatchTest
     , transformationApplyTest
     , transformationsApplyTest
+    , reflectTest
   ]
 
 substituteAlt :: Char -> [Char] -> [Char] -> Bool
@@ -90,7 +98,7 @@ substituteAlt wild list rep = substitute wild list rep == replace [wild] rep lis
 propertyTests :: TestTree
 propertyTests = testGroup "All property tests"
   [
-    testProperty "substitute same as MissingH replace" substituteAlt
+      testProperty "substitute same as MissingH replace" substituteAlt
   ]
 
 allTests = testGroup "All tests"

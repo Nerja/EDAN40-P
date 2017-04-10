@@ -33,9 +33,15 @@ rulesApply :: [PhrasePair] -> Phrase -> Phrase
 {- TO BE WRITTEN -}
 rulesApply _ = id
 
+-- | Replaces each word in a phrase with its corresponding word in the map
+--   given by reflections.
+--
+--   Examples:
+--
+--   >>> reflect ["am", "my"]
+--   ["are","your"]
 reflect :: Phrase -> Phrase
-{- TO BE WRITTEN -}
-reflect = id
+reflect = map $ try (`lookup` reflections)
 
 reflections =
   [ ("am",     "are"),
@@ -154,7 +160,7 @@ match wildcard (p:ps) (s:ss)
 --   >>> singleWildcardMatch '*' "*do" "dobedo"
 --   Nothing
 singleWildcardMatch :: Eq a => a -> [a] -> [a] -> Maybe [a]
-singleWildcardMatch wildcard (wc:ps) (x:xs) = mmap (\_ -> [x]) $ match wildcard ps xs
+singleWildcardMatch wildcard (wc:ps) (x:xs) = mmap (const [x]) $ match wildcard ps xs
 
 -- | Helper function for matching. Considers the case where the wildcard is
 --   bound to x appended to possible more elements found by calling match.
@@ -196,7 +202,7 @@ longerWildcardMatch wildcard ps (x:xs) = mmap (x:) $ match wildcard ps xs
 --   >>> transformationApply '*' id "My name is Zacharias" ("My name is *", "Je m'appelle *")
 --   Just "Je m'appelle Zacharias"
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply wildcard func input transPair = mmap ((substitute wildcard substitute_template).func) matchResult
+transformationApply wildcard func input transPair = mmap (substitute wildcard substitute_template . func) matchResult
   where matchResult           = match wildcard search_template input
         substitute_template   = snd transPair
         search_template       = fst transPair
@@ -208,6 +214,12 @@ transformationApply wildcard func input transPair = mmap ((substitute wildcard s
 --
 --   Examples:
 --
+--   >>> transformationsApply '*' id [("Lol *", "Lulz *"), ("My name is *", "Ich heisse *")] "My name is Eliza"
+--   Just "Ich heisse Eliza"
+--   >>> transformationsApply '*' id [("Lol *", "Lulz *"), ("My house is *", "Ich heisse *")] "My name is Eliza"
+--   Nothing
+--   >>> transformationsApply '*' id [("* Lol", "* Lulz"), ("My name is *", "Ich heisse *")] "My name is Eliza, Lol"
+--   Just "My name is Eliza, Lulz"
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
 transformationsApply wildcard func transformations input = foldl doApply Nothing transformations
   where doApply acc x = orElse acc $ transformationApply wildcard func input x

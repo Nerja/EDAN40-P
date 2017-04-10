@@ -2,6 +2,7 @@ module Chatterbot where
 import Utilities
 import System.Random
 import Data.Char
+import Data.Maybe
 
 chatterbot :: String -> [(String, [String])] -> IO ()
 chatterbot botName botRules = do
@@ -29,9 +30,10 @@ stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 {- TO BE WRITTEN -}
 stateOfMind _ = return id
 
+-- | Applies a list of pattern transformations on an input Phrase.
+--   The intermediate result is reflected.
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-rulesApply _ = id
+rulesApply rules = fromMaybe [] . transformationsApply "*" reflect rules
 
 -- | Replaces each word in a phrase with its corresponding word in the map
 --   given by reflections.

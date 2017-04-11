@@ -3,6 +3,8 @@ import Utilities
 import System.Random
 import Data.Char
 
+import Data.Maybe
+
 chatterbot :: String -> [(String, [String])] -> IO ()
 chatterbot botName botRules = do
     putStrLn ("\n\nHi! I am " ++ botName ++ ". How are you?")
@@ -120,7 +122,8 @@ match _ _ [] = Nothing
 match _ [] _ = Nothing
 match wildcard (p:ps) (s:ss)
   | p /= wildcard && p == s = match wildcard ps ss
-  | p == wildcard           = orElse (singleWildcardMatch (p:ps) (s:ss)) (longerWildcardMatch (p:ps) (s:ss))
+  | p == wildcard           = orElse (singleWildcardMatch (p:ps) (s:ss))
+      (longerWildcardMatch (p:ps) (s:ss))
   | otherwise = Nothing
 {- TO BE WRITTEN -}
 
@@ -153,11 +156,14 @@ longerWildcardMatch (wc:ps) (x:xs) = mmap (x:) (match wc (wc:ps) xs)
 
 -- Applying a single pattern
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply _ _ _ _ = Nothing
+transformationApply wc func input (a, b) = mmap (substitute wc b . func) (match wc a input)
 {- TO BE WRITTEN -}
 
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply _ _ _ _ = Nothing
+transformationsApply _ _ [] _ = Nothing
+transformationsApply wc func (x:xs) input
+  | isNothing (transformationApply wc func input x) = transformationsApply wc func xs input
+  | otherwise                                       = transformationApply wc func input x
 {- TO BE WRITTEN -}

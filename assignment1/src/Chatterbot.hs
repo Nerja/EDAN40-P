@@ -25,15 +25,29 @@ type BotBrain = [(Phrase, [Phrase])]
 
 
 --------------------------------------------------------
-
+-- | Takes a BotBrain consisting of possible answer
+--   patterns for different question patterns. This function
+--   returns a function that takes a Phrase and formulates
+--   a answer using one of the corresponding answer patterns.
+--   The used answer pattern is picked at random from the associated
+--   answer patterns.
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
-{- TO BE WRITTEN -}
-stateOfMind _ = return id
+stateOfMind brain = do
+    r <- randomIO :: IO Float
+    return (rulesApply $ (map.map2) (id, pick r) brain)
+
+
+-- | Function decomposition of two functions f and g.
+--   function g is applied first and should take two parameters.
+--   Function f is applied to the result of function g.
+--   Function comes from "http://buffered.io/posts/point-free-style-what-is-it-good-for/"
+(.^) :: (b -> c) -> (a1 -> a -> b) -> a1 -> a -> c
+(.^) = (.) . (.)
 
 -- | Applies a list of pattern transformations on an input Phrase.
 --   The intermediate result is reflected.
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-rulesApply rules = fromMaybe [] . transformationsApply "*" reflect rules
+rulesApply = fromMaybe [] .^ transformationsApply "*" reflect
 
 -- | Replaces each word in a phrase with its corresponding word in the map
 --   given by reflections.
@@ -77,7 +91,6 @@ prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
 rulesCompile :: [(String, [String])] -> BotBrain
-{- TO BE WRITTEN -}
 rulesCompile _ = []
 
 

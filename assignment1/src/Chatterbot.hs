@@ -28,7 +28,7 @@ type BotBrain = [(Phrase, [Phrase])]
 -- | Takes a BotBrain consisting of possible answer
 --   patterns for different question patterns. This function
 --   returns a function that takes a Phrase and formulates
---   a answer using one of the corresponding answer patterns.
+--   an answer using one of the corresponding answer patterns.
 --   The used answer pattern is picked at random from the associated
 --   answer patterns.
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
@@ -90,8 +90,19 @@ present = unwords
 prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
+-- | Compiles the given format to use the BotBrain format.
+--   Basically changes all Strings to the Phrase format where
+--   each word is a String and a ordinary sentences is encoded as several
+--   strings. Before converting the format all characters is converted into
+--   lowercase.
+--
+--   Examples:
+--
+--   >>> rulesCompile [("Hej *", ["Hello *", "Hi *"])]
+--   [(["hej","*"],[["hello","*"],["hi","*"]])]
 rulesCompile :: [(String, [String])] -> BotBrain
-rulesCompile _ = []
+rulesCompile = (map.map2) (words, map words) . makeLower
+  where makeLower = (map.map2) (map toLower, map $ map toLower)
 
 
 --------------------------------------

@@ -90,6 +90,13 @@ rulesApplyTest = testGroup "Unit tests for rulesApply"
         @?= (words "")
   ]
 
+compileTest :: TestTree
+compileTest = testGroup "Unit tests for compile"
+  [
+    testCase "An small example" $ rulesCompile [("Hej *", ["Hello *", "Hi *"])]
+    @?= [(["hej","*"],[["hello","*"],["hi","*"]])]
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -101,6 +108,7 @@ unitTests = testGroup "All unit tests"
     , transformationsApplyTest
     , reflectTest
     , rulesApplyTest
+    , compileTest
   ]
 
 substituteAlt :: Char -> [Char] -> [Char] -> Bool

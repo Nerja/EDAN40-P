@@ -97,6 +97,15 @@ compileTest = testGroup "Unit tests for compile"
     @?= [(["hej","*"],[["hello","*"],["hi","*"]])]
   ]
 
+reduceTest :: TestTree
+reduceTest = testGroup "Unit tests for reduce function"
+  [
+      testCase "Reduce: i am very tired" $ (reduce $ words "i am very tired")
+      @?= (words "i am tired")
+    , testCase "Reduce to fixed point" $ (reduce $ words "i am very very very very tired")
+    @?= (words "i am tired")
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -109,6 +118,7 @@ unitTests = testGroup "All unit tests"
     , reflectTest
     , rulesApplyTest
     , compileTest
+    , reduceTest
   ]
 
 substituteAlt :: Char -> [Char] -> [Char] -> Bool

@@ -126,9 +126,17 @@ reductions = (map.map2) (words, words)
 reduce :: Phrase -> Phrase
 reduce = reductionsApply reductions
 
+-- | Applies a list of reductions to reduce similar statements
+--   to the same statement. The function uses fixedpoint computation.
+--   When no further reductions can be fund the result is returned.
+--
+--   Examples:
+-- 
+--   >>> reductionsApply [(["i","am","very","*"],["i","am","*"])] $ words "i am very very very tired"
+--   ["i","am","tired"]
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-reductionsApply _ = id
+reductionsApply = fix . try . applyReductions
+  where applyReductions = transformationsApply "*" id
 
 
 -------------------------------------------------------

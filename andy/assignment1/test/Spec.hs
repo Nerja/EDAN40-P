@@ -80,6 +80,30 @@ transformationsApplyTest = testGroup "Unit tests for transformationsApply"
         @?= Nothing
   ]
 
+reflectTest :: TestTree
+reflectTest = testGroup "Unit tests for reflect"
+  [
+      testCase "Given reflect test" $ reflect ["i", "will", "never", "see", "my", "reflection", "in", "your", "eyes"]
+        @?= ["you", "will", "never", "see", "your", "reflection", "in", "my", "eyes"]
+  ]
+
+transformations = [(words "I hate *", words "Why do you hate * ?")]
+rulesApplyTest :: TestTree
+rulesApplyTest = testGroup "Unit tests for rulesApply"
+  [
+      testCase "Given testcase nbr 1" $ rulesApply transformations (words "I hate my mother")
+        @?= (words "Why do you hate your mother ?")
+    , testCase "Given testcase nbr 2" $ rulesApply transformations (words "ARGH!")
+        @?= (words "")
+  ]
+
+compileTest :: TestTree
+compileTest = testGroup "Unit tests for compile"
+  [
+    testCase "An small example" $ rulesCompile [("Hej *", ["Hello *", "Hi *"])]
+      @?= [(["hej","*"],[["hello","*"],["hi","*"]])]
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -89,6 +113,9 @@ unitTests = testGroup "All unit tests"
     , longerWildcardMatchTest
     , transformationApplyTest
     , transformationsApplyTest
+    , reflectTest
+    , rulesApplyTest
+    , compileTest
   ]
 
 substituteAlt :: Char -> [Char] -> [Char] -> Bool

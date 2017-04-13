@@ -164,8 +164,5 @@ transformationApply wc func input (a, b) = mmap (substitute wc b . func) (match 
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply _ _ [] _ = Nothing
-transformationsApply wc func (x:xs) input
-  | isNothing (transformationApply wc func input x) = transformationsApply wc func xs input
-  | otherwise                                       = transformationApply wc func input x
+transformationsApply wc func xs input = foldl1 orElse (map (transformationApply wc func input) xs)
 {- TO BE WRITTEN -}

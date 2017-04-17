@@ -101,8 +101,8 @@ prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 --   >>> rulesCompile [("Hej *", ["Hello *", "Hi *"])]
 --   [(["hej","*"],[["hello","*"],["hi","*"]])]
 rulesCompile :: [(String, [String])] -> BotBrain
-rulesCompile = (map.map2) (words, map words) . makeLower
-  where makeLower = (map.map2) (map toLower, map $ map toLower)
+rulesCompile = (map.map2) (lowerWords, map lowerWords)
+  where lowerWords = words . map toLower
 
 
 --------------------------------------
@@ -131,7 +131,7 @@ reduce = reductionsApply reductions
 --   When no further reductions can be fund the result is returned.
 --
 --   Examples:
--- 
+--
 --   >>> reductionsApply [(["i","am","very","*"],["i","am","*"])] $ words "i am very very very tired"
 --   ["i","am","tired"]
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
@@ -153,9 +153,9 @@ reductionsApply = fix . try . applyReductions
 -- >>> substitute 1 [1,2,3,1,2] [0]
 -- [0,2,3,0,2]
 substitute :: Eq a => a -> [a] -> [a] -> [a]
-substitute wildcard t s = foldr selector [] t
-  where selector x acc | x == wildcard     = s ++ acc
-                       | otherwise         = x : acc
+substitute wildcard t s = concatMap picker t
+  where picker x | x == wildcard    = s
+                 | otherwise        = [x]
 
 
 -- | Tries to match two lists. The first parameter is the wildcard used in
@@ -194,7 +194,7 @@ match wildcard (p:ps) (s:ss)
 --   >>> singleWildcardMatch '*' "*do" "dobedo"
 --   Nothing
 singleWildcardMatch :: Eq a => a -> [a] -> [a] -> Maybe [a]
-singleWildcardMatch wildcard (wc:ps) (x:xs) = mmap (const [x]) $ match wildcard ps xs
+singleWildcardMatch wildcard (_:ps) (x:xs) = mmap (const [x]) $ match wildcard ps xs
 
 -- | Helper function for matching. Considers the case where the wildcard is
 --   bound to x appended to possible more elements found by calling match.

@@ -35,7 +35,7 @@ stateOfMind brain = do
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
 {- TO BE WRITTEN -}
-rulesApply pp p = fromMaybe [] (transformationsApply "*" reflect pp p)
+rulesApply = (fromMaybe [] .) . transformationsApply "*" reflect 
 
 reflect :: Phrase -> Phrase
 {- TO BE WRITTEN -}

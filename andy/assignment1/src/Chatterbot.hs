@@ -100,7 +100,7 @@ reduce = reductionsApply reductions
 
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
 {- TO BE WRITTEN -}
-reductionsApply _ = id
+reductionsApply = fix . try . transformationsApply "*" id
 
 
 -------------------------------------------------------

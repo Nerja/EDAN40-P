@@ -3,6 +3,7 @@ import Utilities
 import System.Random
 import Data.Char
 import Data.Maybe
+import Control.Monad
 
 chatterbot :: String -> [(String, [String])] -> IO ()
 chatterbot botName botRules = do
@@ -88,7 +89,17 @@ present :: Phrase -> String
 present = unwords
 
 prepare :: String -> Phrase
-prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
+prepare = reduce . lowerWords . filter (not . flip elem ".,:;*!#%&|")
+
+-- | Function to take a string and splitting the string into words that are
+--   lowercase.
+--
+--   Examples:
+--
+--   >>> lowerWords "DaGs FoR Kaffe"
+--   ["dags","for","kaffe"]
+lowerWords :: String -> [String]
+lowerWords = words . map toLower
 
 -- | Compiles the given format to use the BotBrain format.
 --   Basically changes all Strings to the Phrase format where
@@ -102,8 +113,6 @@ prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 --   [(["hej","*"],[["hello","*"],["hi","*"]])]
 rulesCompile :: [(String, [String])] -> BotBrain
 rulesCompile = (map.map2) (lowerWords, map lowerWords)
-  where lowerWords = words . map toLower
-
 
 --------------------------------------
 
@@ -255,5 +264,4 @@ transformationApply wildcard func input transPair = mmap (substitute wildcard su
 --   >>> transformationsApply '*' id [("* Lol", "* Lulz"), ("My name is *", "Ich heisse *")] "My name is Eliza, Lol"
 --   Just "My name is Eliza, Lulz"
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply wildcard func transformations input = foldl doApply Nothing transformations
-  where doApply acc x = orElse acc $ transformationApply wildcard func input x
+transformationsApply wildcard func transformations = msum . flip map transformations . transformationApply wildcard func

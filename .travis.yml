@@ -18,7 +18,7 @@ before_install:
   - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
-  - cd assignment1
+  - cd /marcus/assignment1
   - stack --no-terminal --install-ghc test --only-dependencies
   - stack install doctest
 
@@ -28,7 +28,7 @@ script:
   - stack test
   - stack exec doctest src/Utilities.hs
   - stack exec doctest src/Chatterbot.hs
-  - cd ../andy/assignment1
+  - cd ../../andy/assignment1
   - stack build
   - stack haddock
   - stack test

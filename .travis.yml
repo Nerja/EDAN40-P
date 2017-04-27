@@ -38,4 +38,4 @@ script:
   - stack build
   - stack haddock
   - stack test
-  - stack exec doctest src/StringAlignment.hs
+  - stack exec doctest src/Lib.hs

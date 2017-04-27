@@ -34,7 +34,12 @@ script:
   - stack test
   - stack exec doctest src/Utilities.hs
   - stack exec doctest src/Chatterbot.hs
-  - cd ../../marcus/assignment2/StringAlignment
+  - cd ../../marcus/StringAlignment
+  - stack build
+  - stack haddock
+  - stack test
+  - stack exec doctest src/Lib.hs
+  - cd ../../andy/assignment2
   - stack build
   - stack haddock
   - stack test

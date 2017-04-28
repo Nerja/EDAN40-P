@@ -39,8 +39,7 @@ similarityScore a b c alls@(s:ss) allt@(t:ts) = maximum [keepLetters, spaceS, sp
 --   >>> score 1 2 3 'a' 'a'
 --   1
 score :: Int -> Int -> Int -> Char -> Char -> Int
-score a b c x y | x == '-'   = c
-                | y == '-'   = c
+score a b c x y | x == '-' || y == '-'  = c
                 | x == y     = a
                 | otherwise  = b
 
@@ -89,7 +88,7 @@ optAlignments a b c alls@(s:ss) allt@(t:ts) = maximaBy compScore alignments
         keepLetters = attachHeads s t $ optAlignments a b c ss ts
         spaceS      = attachHeads '-' t $ optAlignments a b c alls ts
         spaceT      = attachHeads s '-' $ optAlignments a b c ss allt
-        compScore   = uncurry $ sum .^ zipWith (score a b c)
+        compScore   = uncurry $ (sum .) . zipWith (score a b c)
 
 -- | Takes two strings s and t and returns all optimal alignments of
 --   the two strings. The cost parameters are given

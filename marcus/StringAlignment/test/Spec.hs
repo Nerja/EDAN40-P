@@ -30,12 +30,19 @@ optAlignmentsTest = testGroup "Unit tests for optAlignments"
     , testCase "Given case" $ (sort $ optAlignments 0 (-1) (-1) "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
   ]
 
+outputOptAlignmentsTest :: TestTree
+outputOptAlignmentsTest = testGroup "Unit tests for outputOptAlignments"
+  [
+    testCase "Given case" $ outputOptAlignments 0 (-1) (-1) "writers" "vintner" @?= "w r i t - e r s\nv i n t n e r -\n\nw r i - t - e r s\nv - i n t n e r -\n\nw r i - t - e r s\n- v i n t n e r -\n\n"
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
       similarityScoreTest
     , maximaByTest
     , optAlignmentsTest
+    , outputOptAlignmentsTest
   ]
 
 main = defaultMain unitTests

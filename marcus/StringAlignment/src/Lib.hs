@@ -3,9 +3,11 @@ module Lib
     similarityScore
   , maximaBy
   , optAlignments
+  , outputOptAlignments
 ) where
 
 import Utils
+import Data.List
 
 -- | Returns the score of the optimal alignment of two strings.
 --   scoreMatch, scoreMisMatch, scoreSpace is the used parameters
@@ -74,6 +76,11 @@ type AlignmentType = (String, String)
 --   the two strings. The cost parameters are given
 --   as the first three arguments in the order scoreMatch, scoreMismatch,
 --   scoreSpace.
+--
+--   Examples:
+--
+--   >>> optAlignments 0 (-1) (-1) "writers" "vintner"
+--   [("writ-ers","vintner-"),("wri-t-ers","v-intner-"),("wri-t-ers","-vintner-")]
 optAlignments :: Int -> Int -> Int -> String -> String -> [AlignmentType]
 optAlignments _ _ _ [] t = [(replicate (length t) '-', t)]
 optAlignments _ _ _ s [] = [(s, replicate (length s) '-')]
@@ -83,3 +90,11 @@ optAlignments a b c alls@(s:ss) allt@(t:ts) = maximaBy compScore alignments
         spaceS      = attachHeads '-' t $ optAlignments a b c alls ts
         spaceT      = attachHeads s '-' $ optAlignments a b c ss allt
         compScore   = uncurry $ sum .^ zipWith (score a b c)
+
+-- | Takes two strings s and t and returns all optimal alignments of
+--   the two strings. The cost parameters are given
+--   as the first three arguments in the order scoreMatch, scoreMismatch,
+--   scoreSpace. The optimal alignments are returned as a string.
+outputOptAlignments :: Int -> Int -> Int -> String -> String -> String
+outputOptAlignments a b c = (concatMap alignStr .) . optAlignments a b c
+  where alignStr (a, b) =  (intersperse ' ' a) ++ "\n" ++ (intersperse ' ' b) ++ "\n" ++ "\n"

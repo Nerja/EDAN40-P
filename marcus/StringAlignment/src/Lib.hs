@@ -4,6 +4,7 @@ module Lib
   , maximaBy
   , optAlignments
   , outputOptAlignments
+  , similarityScore'
 ) where
 
 import Utils
@@ -97,3 +98,20 @@ optAlignments a b c alls@(s:ss) allt@(t:ts) = maximaBy compScore alignments
 outputOptAlignments :: Int -> Int -> Int -> String -> String -> String
 outputOptAlignments = ((((concatMap alignStr. ) .) .) .) . optAlignments
   where alignStr (a, b) =  (intersperse ' ' a) ++ "\n" ++ (intersperse ' ' b) ++ "\n" ++ "\n"
+
+-- Part 3
+-- Same as similarityScore just faster
+similarityScore' :: Int -> Int -> Int -> String -> String -> Int
+similarityScore' a b c ss ts = simScore (length ss) (length ts)
+  where simScore i j = simTable!!i!!j
+        simTable = [[simEntry i j | j <- [0..]] | i <- [0..]]
+
+        simEntry :: Int -> Int -> Int
+        simEntry 0 j = c * j
+        simEntry i 0 = c * i
+        simEntry i j  = maximum [keepLetters, spaceS, spaceT]
+          where keepLetters     = score a b c s t + simScore (i-1) (j-1)
+                spaceS          = c + simScore i (j-1)
+                spaceT          = c + simScore (i-1) j
+                s               = ss!!(i-1)
+                t               = ts!!(j-1)

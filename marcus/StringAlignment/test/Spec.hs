@@ -11,6 +11,16 @@ similarityScoreTest = testGroup "Unit tests for similarityScore"
     , testCase "writers and vintner" $ similarityScore 0 (-1) (-1) "writers" "vintner" @?= -5
   ]
 
+similarityScore'Test :: TestTree
+similarityScore'Test = testGroup "Unit tests for opt similarityScore'"
+  [
+      testCase "HASKELL and PASCAL" $ similarityScore' 1 (-1) (-2) "HASKELL" "PASCAL" @?= -2
+    , testCase "\"\" with \"\"" $ similarityScore' 1 (-1) (-2) "" "" @?= 0
+    , testCase "writers and vintner" $ similarityScore' 0 (-1) (-1) "writers" "vintner" @?= -5
+    , testCase "first given long case" $ similarityScore' 0 (-1) (-1) "aferociousmonadatemyhamster" "functionalprogrammingrules" @?= -22
+    , testCase "second given long case" $ similarityScore' 0 (-1) (-1) "bananrepubliksinvasionsarmestabsadjutant" "kontrabasfiolfodralmakarmästarlärling" @?= -30
+  ]
+
 maximaByTest :: TestTree
 maximaByTest = testGroup "Unit tests for maximaByTest"
   [
@@ -43,6 +53,7 @@ unitTests = testGroup "All unit tests"
     , maximaByTest
     , optAlignmentsTest
     , outputOptAlignmentsTest
+    , similarityScore'Test
   ]
 
 main = defaultMain unitTests

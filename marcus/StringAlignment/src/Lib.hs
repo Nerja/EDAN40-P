@@ -95,5 +95,5 @@ optAlignments a b c alls@(s:ss) allt@(t:ts) = maximaBy compScore alignments
 --   as the first three arguments in the order scoreMatch, scoreMismatch,
 --   scoreSpace. The optimal alignments are returned as a string.
 outputOptAlignments :: Int -> Int -> Int -> String -> String -> String
-outputOptAlignments a b c = (concatMap alignStr .) . optAlignments a b c
+outputOptAlignments = ((((concatMap alignStr. ) .) .) .) . optAlignments
   where alignStr (a, b) =  (intersperse ' ' a) ++ "\n" ++ (intersperse ' ' b) ++ "\n" ++ "\n"

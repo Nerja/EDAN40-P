@@ -2,6 +2,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Lib
 import Data.List
+import Data.Hashable
 
 similarityScoreTest :: TestTree
 similarityScoreTest = testGroup "Unit tests for similarityScore"
@@ -40,10 +41,26 @@ optAlignmentsTest = testGroup "Unit tests for optAlignments"
     , testCase "Given case" $ (sort $ optAlignments 0 (-1) (-1) "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
   ]
 
+optAlignments'Test :: TestTree
+optAlignments'Test = testGroup "Unit tests for opt optAlignments'"
+  [
+      testCase "align \"\" with \"\"" $ optAlignments' 1 1 1 "" "" @?= [("","")]
+    , testCase "align Hejsan with \"\"" $ optAlignments' 1 2 3 "Hejsan" "" @?= [("Hejsan", "------")]
+    , testCase "align \"\" with troll" $ optAlignments' 3 2 1 "" "troll" @?= [("-----", "troll")]
+    , testCase "align Fix with Fix" $ optAlignments' 1 (-1) (-1) "Fix" "Fix" @?= [("Fix", "Fix")]
+    , testCase "Given case" $ (sort $ optAlignments' 0 (-1) (-1) "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
+    , testCase "Given long case" $ (hash $ sort $ optAlignments' 0 (-1) (-1) "aferociousmonadatemyhamster" "functionalprogrammingrules") @?= -9072215712528480068
+    , testCase "Given long case2" $ (hash $ sort $ optAlignments' 1 (-1) (-2) "bananrepubliksinvasionsarmestabsadjutant" "kontrabasfiolfodralmakarmästarlärling") @?= -1599335011229055460
+  ]
+
 outputOptAlignmentsTest :: TestTree
 outputOptAlignmentsTest = testGroup "Unit tests for outputOptAlignments"
   [
-    testCase "Given case" $ outputOptAlignments 0 (-1) (-1) "writers" "vintner" @?= "w r i t - e r s\nv i n t n e r -\n\nw r i - t - e r s\nv - i n t n e r -\n\nw r i - t - e r s\n- v i n t n e r -\n\n"
+      testCase "align \"\" with \"\"" $ optAlignments 1 1 1 "" "" @?= [("","")]
+    , testCase "align Hejsan with \"\"" $ optAlignments 1 2 3 "Hejsan" "" @?= [("Hejsan", "------")]
+    , testCase "align \"\" with troll" $ optAlignments 3 2 1 "" "troll" @?= [("-----", "troll")]
+    , testCase "align Fix with Fix" $ optAlignments 1 (-1) (-1) "Fix" "Fix" @?= [("Fix", "Fix")]
+    , testCase "Given case" $ (sort $ optAlignments 0 (-1) (-1) "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
   ]
 
 unitTests :: TestTree
@@ -54,6 +71,7 @@ unitTests = testGroup "All unit tests"
     , optAlignmentsTest
     , outputOptAlignmentsTest
     , similarityScore'Test
+    , optAlignments'Test
   ]
 
 main = defaultMain unitTests

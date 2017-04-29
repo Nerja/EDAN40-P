@@ -5,6 +5,7 @@ module Lib
   , optAlignments
   , outputOptAlignments
   , similarityScore'
+  , optAlignments'
 ) where
 
 import Utils
@@ -66,10 +67,8 @@ attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 --   >>> maximaBy length ["hej", "fisk", "ksif", "he"]
 --   ["fisk","ksif"]
 maximaBy :: (Ord b) => (a -> b) -> [a] -> [a]
-maximaBy f el = map fst filterAnot
-  where anotPairs   = zip el $ map f el
-        maximumVal  = maximum $ map snd anotPairs
-        filterAnot  = filter ((==maximumVal).snd) anotPairs
+maximaBy f el = filter ((==maximumVal).f) el
+  where maximumVal  = maximum $ map f el
 
 type AlignmentType = (String, String)
 -- | Takes two strings s and t and returns all optimal alignments of
@@ -113,5 +112,22 @@ similarityScore' a b c ss ts = simScore (length ss) (length ts)
           where keepLetters     = score a b c s t + simScore (i-1) (j-1)
                 spaceS          = c + simScore i (j-1)
                 spaceT          = c + simScore (i-1) j
-                s               = ss!!(i-1)
-                t               = ts!!(j-1)
+                s               = ss!!(length ss - i)
+                t               = ts!!(length ts - j)
+
+-- Same as optAlignments just faster
+optAlignments' :: Int -> Int -> Int -> String -> String -> [AlignmentType]
+optAlignments' a b c ss ts = map snd $ optAl (length ss) $ length ts
+  where optAl i j = optTable!!i!!j
+        optTable = [[optEntry i j | j <- [0..]] | i <- [0..]]
+
+        takeTail k s = drop (length s - k) s
+        optEntry :: Int -> Int -> [(Int, AlignmentType)]
+        optEntry 0 j = [(c*j, (replicate j '-', takeTail j ts))]
+        optEntry i 0 = [(c*i, (takeTail i ss, replicate i '-'))]
+        optEntry i j = maximaBy fst (keepLetters ++ spaceS ++ spaceT)
+          where keepLetters     = map (\(rs, (p,q)) -> (rs + score a b c s t, (s:p, t:q))) $ optAl (i-1) (j-1)
+                spaceS          = map (\(rs, (p,q)) -> (rs + c, ('-':p, t:q))) $ optAl i (j-1)
+                spaceT          = map (\(rs, (p,q)) -> (rs + c, (s:p, '-':q))) $ optAl (i-1) j
+                s               = ss!!(length ss - i)
+                t               = ts!!(length ts - j)

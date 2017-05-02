@@ -1,6 +1,7 @@
 import Test.Tasty
 import Test.Tasty.HUnit
 import Lib
+import Data.List
 
 similarityScoreTest :: TestTree
 similarityScoreTest = testGroup "Unit tests for similarityScore"
@@ -20,11 +21,22 @@ maximaByTest = testGroup "Unit tests for maximaByTest"
     , testCase "maximum length all" $ maximaBy length ["grill", "kaffe", "nerja"] @?= ["grill", "kaffe", "nerja"]
   ]
 
+optAlignmentsTest :: TestTree
+optAlignmentsTest = testGroup "Unit tests for optAlignments"
+  [
+      testCase "align \"\" with \"\"" $ optAlignments "" "" @?= [("","")]
+    , testCase "align Hejsan with \"\"" $ optAlignments "Hejsan" "" @?= [("Hejsan", "------")]
+    , testCase "align \"\" with troll" $ optAlignments "" "troll" @?= [("-----", "troll")]
+    , testCase "align Fix with Fix" $ optAlignments "Fix" "Fix" @?= [("Fix", "Fix")]
+    , testCase "Given case" $ (sort $ optAlignments "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
       similarityScoreTest
     , maximaByTest
+    , optAlignmentsTest
   ]
 
 main = defaultMain unitTests

@@ -3,7 +3,10 @@ module Lib
         similarityScore
       , maximaBy
       , optAlignments
+      , outputOptAlignments
     ) where
+
+import Data.List
 
 scoreMatch = 0
 scoreMismatch = -1
@@ -49,3 +52,10 @@ optAlignments (x:xs) (y:ys) = maximaBy (uncurry stringScore) (     attachHeads x
                                                                 ++ attachHeads x '-' (optAlignments xs (y:ys))
                                                                 ++ attachHeads '-' y (optAlignments (x:xs) ys)
                                                              )
+                                                             
+outputOptAlignments :: String -> String -> IO()
+outputOptAlignments string1 string2 = do
+  let alignments = optAlignments string1 string2
+  putStrLn ("\nThere are " ++ show (length alignments) ++ " optimal alignments:\n")
+  sequence_ [putStrLn (intersperse ' ' a ++ "\n" ++ intersperse ' ' b ++ "\n") | (a, b) <- alignments]
+  putStrLn ("There were " ++ show (length alignments) ++ " optimal alignments!")

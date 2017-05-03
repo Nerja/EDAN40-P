@@ -4,6 +4,7 @@ module Lib
       , maximaBy
       , optAlignments
       , outputOptAlignments
+      , similarityScore'
     ) where
 
 import Data.List
@@ -52,10 +53,27 @@ optAlignments (x:xs) (y:ys) = maximaBy (uncurry stringScore) (     attachHeads x
                                                                 ++ attachHeads x '-' (optAlignments xs (y:ys))
                                                                 ++ attachHeads '-' y (optAlignments (x:xs) ys)
                                                              )
-                                                             
-outputOptAlignments :: String -> String -> IO()
+
+outputOptAlignments :: String -> String -> IO ()
 outputOptAlignments string1 string2 = do
   let alignments = optAlignments string1 string2
   putStrLn ("\nThere are " ++ show (length alignments) ++ " optimal alignments:\n")
   sequence_ [putStrLn (intersperse ' ' a ++ "\n" ++ intersperse ' ' b ++ "\n") | (a, b) <- alignments]
   putStrLn ("There were " ++ show (length alignments) ++ " optimal alignments!")
+
+similarityScore' :: String -> String -> Int
+similarityScore' xs ys = simScore (length xs) (length ys)
+  where
+    simScore i j = simTable!!i!!j
+    simTable = [[ simEntry i j | j<-[0..]] | i<-[0..] ]
+
+    simEntry :: Int -> Int -> Int
+    simEntry i 0 = (*) scoreSpace i
+    simEntry 0 j = (*) scoreSpace j
+    simEntry i j = maximum [    (+) (score x y) $ simScore (i-1) (j-1)
+                              , (+) scoreSpace $ simScore i (j-1)
+                              , (+) scoreSpace $ simScore (i-1) j
+                            ]
+      where
+        x = xs!!(i-1)
+        y = ys!!(j-1)

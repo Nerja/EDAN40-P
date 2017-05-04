@@ -41,6 +41,16 @@ similarityScore'Test = testGroup "Unit tests for similarityScore'"
     , testCase "second given long case" $ similarityScore' "bananrepubliksinvasionsarmestabsadjutant" "kontrabasfiolfodralmakarmästarlärling" @?= -30
   ]
 
+optAlignments'Test :: TestTree
+optAlignments'Test = testGroup "Unit tests for optAlignments"
+  [
+      testCase "align \"\" with \"\"" $ optAlignments' "" "" @?= [("","")]
+    , testCase "align Hejsan with \"\"" $ optAlignments' "Hejsan" "" @?= [("Hejsan", "------")]
+    , testCase "align \"\" with troll" $ optAlignments' "" "troll" @?= [("-----", "troll")]
+    , testCase "align Fix with Fix" $ optAlignments' "Fix" "Fix" @?= [("Fix", "Fix")]
+    , testCase "Given case" $ (sort $ optAlignments' "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
@@ -48,6 +58,7 @@ unitTests = testGroup "All unit tests"
     , maximaByTest
     , optAlignmentsTest
     , similarityScore'Test
+    , optAlignments'Test
   ]
 
 main = defaultMain unitTests

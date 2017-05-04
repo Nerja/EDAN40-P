@@ -5,6 +5,7 @@ module Lib
       , optAlignments
       , outputOptAlignments
       , similarityScore'
+      , optAlignments'
     ) where
 
 import Data.List
@@ -74,6 +75,24 @@ similarityScore' xs ys = simScore (length xs) (length ys)
                               , (+) scoreSpace $ simScore i (j-1)
                               , (+) scoreSpace $ simScore (i-1) j
                             ]
+      where
+        x = xs!!(i-1)
+        y = ys!!(j-1)
+
+optAlignments' :: String -> String -> [AlignmentType]
+optAlignments' xs ys = map (\(x,y) -> (reverse x, reverse y)) $ optAl (length xs) (length ys)
+  where
+    optAl i j = optTable!!i!!j
+    optTable = [[ optEntry i j | j<-[0..]] | i<-[0..] ]
+
+    optEntry :: Int -> Int -> [AlignmentType]
+    optEntry 0 0 = [([], [])]
+    optEntry i 0 = attachHeads (xs!!(i-1)) '-' $ optAl (i-1) 0
+    optEntry 0 j = attachHeads '-' (ys!!(j-1)) $ optAl 0 (j-1)
+    optEntry i j = maximaBy (uncurry stringScore) (    attachHeads x y (optAl (i-1) (j-1))
+                                                    ++ attachHeads x '-' (optAl (i-1) j)
+                                                    ++ attachHeads '-' y (optAl i (j-1))
+                                                  )
       where
         x = xs!!(i-1)
         y = ys!!(j-1)

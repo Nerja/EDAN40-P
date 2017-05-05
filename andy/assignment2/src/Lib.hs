@@ -57,7 +57,7 @@ optAlignments (x:xs) (y:ys) = maximaBy (uncurry stringScore) (     attachHeads x
 
 outputOptAlignments :: String -> String -> IO ()
 outputOptAlignments string1 string2 = do
-  let alignments = optAlignments string1 string2
+  let alignments = optAlignments' string1 string2
   putStrLn ("\nThere are " ++ show (length alignments) ++ " optimal alignments:\n")
   sequence_ [putStrLn (intersperse ' ' a ++ "\n" ++ intersperse ' ' b ++ "\n") | (a, b) <- alignments]
   putStrLn ("There were " ++ show (length alignments) ++ " optimal alignments!")
@@ -80,19 +80,24 @@ similarityScore' xs ys = simScore (length xs) (length ys)
         y = ys!!(j-1)
 
 optAlignments' :: String -> String -> [AlignmentType]
-optAlignments' xs ys = map (\(x,y) -> (reverse x, reverse y)) $ optAl (length xs) (length ys)
+optAlignments' xs ys = map (\(x,y) -> (reverse x, reverse y)) $ snd $ optAl (length xs) (length ys)
   where
     optAl i j = optTable!!i!!j
     optTable = [[ optEntry i j | j<-[0..]] | i<-[0..] ]
 
-    optEntry :: Int -> Int -> [AlignmentType]
-    optEntry 0 0 = [([], [])]
-    optEntry i 0 = attachHeads (xs!!(i-1)) '-' $ optAl (i-1) 0
-    optEntry 0 j = attachHeads '-' (ys!!(j-1)) $ optAl 0 (j-1)
-    optEntry i j = maximaBy (uncurry stringScore) (    attachHeads x y (optAl (i-1) (j-1))
-                                                    ++ attachHeads x '-' (optAl (i-1) j)
-                                                    ++ attachHeads '-' y (optAl i (j-1))
-                                                  )
+    optEntry :: Int -> Int -> (Int, [AlignmentType])
+    optEntry 0 0 = (0, [([], [])])
+    optEntry i 0 = ( (*) scoreSpace i, attachHeads x '-' $ snd $ optAl (i-1) 0 )
       where
         x = xs!!(i-1)
+    optEntry 0 j = ( (*) scoreSpace j, attachHeads '-' y $ snd $ optAl 0 (j-1) )
+      where
         y = ys!!(j-1)
+    optEntry i j = (fst $ head entry, concatMap snd entry)
+      where
+        entry = maximaBy fst [    ( (+) (score x y) (fst $ optAl (i-1) (j-1)), attachHeads x y (snd $ optAl (i-1) (j-1)) )
+                                , ( (+) scoreSpace (fst $ optAl i (j-1)), attachHeads '-' y (snd $ optAl i (j-1)) )
+                                , ( (+) scoreSpace (fst $ optAl (i-1) j), attachHeads x '-' (snd $ optAl (i-1) j) )
+                             ]
+        x     = xs!!(i-1)
+        y     = ys!!(j-1)

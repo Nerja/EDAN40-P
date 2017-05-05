@@ -2,6 +2,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Lib
 import Data.List
+import Data.Hashable
 
 similarityScoreTest :: TestTree
 similarityScoreTest = testGroup "Unit tests for similarityScore"
@@ -42,13 +43,15 @@ similarityScore'Test = testGroup "Unit tests for similarityScore'"
   ]
 
 optAlignments'Test :: TestTree
-optAlignments'Test = testGroup "Unit tests for optAlignments"
+optAlignments'Test = testGroup "Unit tests for optAlignments'"
   [
       testCase "align \"\" with \"\"" $ optAlignments' "" "" @?= [("","")]
     , testCase "align Hejsan with \"\"" $ optAlignments' "Hejsan" "" @?= [("Hejsan", "------")]
     , testCase "align \"\" with troll" $ optAlignments' "" "troll" @?= [("-----", "troll")]
     , testCase "align Fix with Fix" $ optAlignments' "Fix" "Fix" @?= [("Fix", "Fix")]
     , testCase "Given case" $ (sort $ optAlignments' "writers" "vintner") @?= (sort [("writ-ers","vintner-"), ("wri-t-ers","-vintner-"), ("wri-t-ers","v-intner-")])
+    , testCase "Given long case" $ (hash $ sort $ optAlignments' "aferociousmonadatemyhamster" "functionalprogrammingrules") @?= -9072215712528480068
+    , testCase "Given long case2" $ (hash $ sort $ optAlignments' "bananrepubliksinvasionsarmestabsadjutant" "kontrabasfiolfodralmakarmästarlärling") @?= -777904762936207364
   ]
 
 unitTests :: TestTree

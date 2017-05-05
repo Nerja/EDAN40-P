@@ -9,6 +9,7 @@ module Lib
     ) where
 
 import Data.List
+import Control.Arrow
 
 scoreMatch = 0
 scoreMismatch = -1
@@ -43,7 +44,7 @@ attachHeads :: a -> a -> [([a],[a])] -> [([a],[a])]
 attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
 maximaBy :: Ord b => (a -> b) -> [a] -> [a]
-maximaBy valueFcn xs = [x | x <- xs, valueFcn x == (maximum $ map valueFcn xs)]
+maximaBy valueFcn xs = [x | x <- xs, valueFcn x == maximum (map valueFcn xs)]
 
 type AlignmentType = (String, String)
 
@@ -80,7 +81,7 @@ similarityScore' xs ys = simScore (length xs) (length ys)
         y = ys!!(j-1)
 
 optAlignments' :: String -> String -> [AlignmentType]
-optAlignments' xs ys = map (\(x,y) -> (reverse x, reverse y)) $ snd $ optAl (length xs) (length ys)
+optAlignments' xs ys = map (reverse *** reverse) $ snd $ optAl (length xs) (length ys)
   where
     optAl i j = optTable!!i!!j
     optTable = [[ optEntry i j | j<-[0..]] | i<-[0..] ]
@@ -95,9 +96,9 @@ optAlignments' xs ys = map (\(x,y) -> (reverse x, reverse y)) $ snd $ optAl (len
         y = ys!!(j-1)
     optEntry i j = (fst $ head entry, concatMap snd entry)
       where
-        entry = maximaBy fst [    ( (+) (score x y) (fst $ optAl (i-1) (j-1)), attachHeads x y (snd $ optAl (i-1) (j-1)) )
-                                , ( (+) scoreSpace (fst $ optAl i (j-1)), attachHeads '-' y (snd $ optAl i (j-1)) )
-                                , ( (+) scoreSpace (fst $ optAl (i-1) j), attachHeads x '-' (snd $ optAl (i-1) j) )
+        entry = maximaBy fst [    ( (+) (score x y) *** attachHeads x y) $ optAl (i-1) (j-1)
+                                , ( (+) scoreSpace *** attachHeads '-' y) $ optAl i (j-1)
+                                , ( (+) scoreSpace *** attachHeads x '-') $ optAl (i-1) j
                              ]
         x     = xs!!(i-1)
         y     = ys!!(j-1)

@@ -35,10 +35,11 @@ word :: Parser String
 word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
-chars n =  error "chars not implemented"
+chars 0 = return []
+chars n = char # chars (n-1) >-> cons
 
 accept :: String -> Parser String
-accept w = (token (chars (length w))) ? (==w)
+accept w = token (chars (length w)) ? (==w)
 
 require :: String -> Parser String
 require w  = error "require not implemented"

@@ -7,15 +7,24 @@ import Parser
 letterTest :: TestTree
 letterTest = testGroup "Unit tests for letter"
   [
-      testCase "Letter \"abc\"" $ letter "abc" @?= Just ('a', "bc")
-    , testCase "Letter \"123\"" $ letter "123" @?= Nothing
-    , testCase "Letter \"\"" $ letter "" @?= Nothing 
+      testCase "\"abc\"" $ letter "abc" @?= Just('a', "bc")
+    , testCase "\"123\"" $ letter "123" @?= Nothing
+    , testCase "\"\"" $ letter "" @?= Nothing
+  ]
+
+-- Tests for Parser.spaces
+spacesTest :: TestTree
+spacesTest = testGroup "Unit tests for spaces"
+  [
+      testCase "\"abc\"" $ spaces "abc" @?= Just("", "abc")
+    , testCase "\"  \t abc\"" $ spaces "  \t abc" @?= Just("  \t ","abc")
   ]
 
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
       letterTest
+    , spacesTest
   ]
 
 allTests = testGroup "All tests"

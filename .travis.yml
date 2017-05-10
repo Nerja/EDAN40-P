@@ -44,3 +44,7 @@ script:
   - stack haddock
   - stack test
   - stack exec doctest src/Lib.hs
+  - cd ../../andy/assignment3
+  - stack build
+  - stack haddock
+  - stack test

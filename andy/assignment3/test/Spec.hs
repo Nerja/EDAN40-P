@@ -1,6 +1,5 @@
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
 import Parser
 
 -- Tests for Parser.letter
@@ -29,12 +28,42 @@ charsTest = testGroup "Unit tests for chars"
     , testCase "3 \"ab\"" $ chars 3 "ab" @?= Nothing
   ]
 
+-- Tests for Parser.require
+requireTest :: TestTree
+requireTest = testGroup "Unit tests for require"
+  [
+      testCase "require \":=\" from \":= 1337\"" $ require ":=" ":= 1337" @?= Just(":=", "1337")
+    , testCase "given case 1" $ require ":=" ":= 1" @?= Just(":=","1")
+  ]
+
+-- Tests for Parser.-#
+bindBoardTest :: TestTree
+bindBoardTest = testGroup "All unit tests for -#"
+  [
+      testCase "" $ (accept "Lund" -# word) "Lund University" @?= Just ("University", "")
+    , testCase "" $ (accept "Gote" -# word) "Lund University" @?= Nothing
+    , testCase "" $ (word -# (accept "Nej")) "Lund University" @?= Nothing
+    , testCase "given case" $ (accept "read" -# word) "read count" @?= Just("count","")
+  ]
+
+-- Tests for Parser.#-
+boardBindTest :: TestTree
+boardBindTest = testGroup "All unit tests for #-"
+  [
+      testCase "" $ (accept "Lund" #- word) "Lund University" @?= Just ("Lund", "")
+    , testCase "" $ (accept "Gote" #- word) "Lund University" @?= Nothing
+    , testCase "" $ (word #- (accept "Nej")) "Lund University" @?= Nothing
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
       letterTest
     , spacesTest
     , charsTest
+    , requireTest
+    , bindBoardTest
+    , boardBindTest
   ]
 
 allTests = testGroup "All tests"

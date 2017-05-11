@@ -1,8 +1,11 @@
 import Parser
+import Dictionary
+import Expr
 import Test.Tasty
 import Test.Tasty.HUnit
 import Control.Monad
 import Control.Exception
+import Test.Hspec
 
 assertException :: (Exception e, Eq e) => e -> IO a -> IO ()
 assertException ex action =
@@ -41,6 +44,7 @@ requireTest :: TestTree
 requireTest = testGroup "All unit tests for require"
   [
       testCase "require \":=\" from \":= 1337\"" $ require ":=" ":= 1337" @?= Just (":=", "1337")
+    , testCase "Given case" $ evaluate (require "else" "then") `shouldThrow` anyException
   ]
 
 bindBoardTest :: TestTree
@@ -70,10 +74,37 @@ parserTest = testGroup "All unit tests for Parser.hs"
     , boardBindTest
   ]
 
+------------------
+testValue string = value (fromString string) dict
+dict = Dictionary.insert ("x", 1) $
+       Dictionary.insert ("y", 2) $
+       Dictionary.empty
+valueTest :: TestTree
+valueTest = testGroup "All unit tests for value"
+  [
+      testCase "Single number" $ testValue "1337" @?= 1337
+    , testCase "Single variable" $ testValue "x" @?= 1
+    , testCase "Simple add" $ testValue "1+3" @?= 4
+    , testCase "Simple sub" $ testValue "2-10" @?= (-8)
+    , testCase "Simple div" $ testValue "21/7" @?= 3
+    , testCase "Simple mult" $ testValue "3*7" @?= 21
+    , testCase "Add two vars" $ testValue "x+y" @?= 3
+    , testCase "Add some vars" $ testValue "x-y-y" @?= (-3)
+    , testCase "Div by zero" $ evaluate (testValue "1337 + 1336/0 - 10") `shouldThrow` anyException
+    , testCase "Undef var" $ evaluate (testValue "1337 + k - 10") `shouldThrow` anyException
+  ]
+
+exprTest :: TestTree
+exprTest = testGroup "All unit tests for Expr.hs"
+  [
+    valueTest
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
-    parserTest
+      parserTest
+    , exprTest
   ]
 
 main = defaultMain unitTests

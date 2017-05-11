@@ -1,6 +1,7 @@
 import Parser
 import Dictionary
 import Expr
+import Statement
 import Test.Tasty
 import Test.Tasty.HUnit
 import Control.Monad
@@ -94,6 +95,26 @@ valueTest = testGroup "All unit tests for value"
     , testCase "Undef var" $ evaluate (testValue "1337 + k - 10") `shouldThrow` anyException
   ]
 
+parseTest :: TestTree
+parseTest = testGroup "all unit tests fr Task 3.b"
+  [
+      testCase "Parse assignment" $ toString (fromString "count := 0;" :: Statement.T) @?= "count := 0;"
+    , testCase "Parse skip" $ toString (fromString "skip;" :: Statement.T) @?= "skip;"
+    , testCase "Parse read" $ toString (fromString "read count;" :: Statement.T) @?= "read count;"
+    , testCase "Parse write" $ toString (fromString "write count+1;" :: Statement.T) @?= "write count+1;"
+    , testCase "Parse if" $ toString (fromString "if x then skip; else x:=0-x;" :: Statement.T) @?= "if x then skip; else x := 0-x;"
+    , testCase "Parse while" $ toString (fromString "while n do n:=n-1;" :: Statement.T) @?= "while n do n := n-1;"
+    , testCase "Empty begin end" $ toString (fromString "begin end" :: Statement.T) @?= "begin end"
+    , testCase "Simple begin end" $ toString (fromString "begin skip; end" :: Statement.T) @?= "begin skip; end"
+    , testCase "Parse begin end given case" $ toString (fromString "begin read x ; x := x + 1 ; write x; end" :: Statement.T) @?= "begin read x; x := x+1; write x; end"
+  ]
+
+statementTest :: TestTree
+statementTest = testGroup "All unit tests for Statement.hs"
+  [
+      parseTest
+  ]
+
 exprTest :: TestTree
 exprTest = testGroup "All unit tests for Expr.hs"
   [
@@ -105,6 +126,7 @@ unitTests = testGroup "All unit tests"
   [
       parserTest
     , exprTest
+    , statementTest
   ]
 
 main = defaultMain unitTests

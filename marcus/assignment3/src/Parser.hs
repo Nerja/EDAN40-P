@@ -85,7 +85,7 @@ accept w = (token (chars (length w))) ? (==w)
 -- | Parser that accepts the given string. In case of failure
 --   uses err to report the failure.
 require :: String -> Parser String
-require w  = accept w ! err w
+require w  = accept w ! err ("expecting: " ++ w)
 
 lit :: Char -> Parser Char
 lit c = token char ? (==c)

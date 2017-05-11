@@ -48,3 +48,8 @@ script:
   - stack build
   - stack haddock
   - stack test
+  - cd ../../marcus/assignment3
+  - stack build
+  - stack haddock
+  - stack test
+  - stack exec doctest src/Parser.hs

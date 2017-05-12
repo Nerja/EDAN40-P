@@ -5,6 +5,7 @@ import Control.Exception
 import Parser
 import Dictionary
 import Expr
+import Statement
 
 -- Tests for Parser.letter
 letterTest :: TestTree
@@ -102,10 +103,39 @@ exprTests = testGroup "All Expr.hs tests"
       valueTest
   ]
 
+------------------------------------------------------
+s9 = "while n do begin fac:=fac*n; n:=n-1; end"
+parseTest :: TestTree
+parseTest = testGroup "all unit tests for Task 3.b"
+  [
+      testCase "Parse assignment" $ toString (fromString "count := 0;" :: Statement.T) @?= "count := 0;\n"
+    , testCase "Parse skip" $ toString (fromString "skip;" :: Statement.T) @?= "skip;\n"
+    , testCase "Parse read" $ toString (fromString "read count;" :: Statement.T) @?= "read count;\n"
+    , testCase "Parse write" $ toString (fromString "write count+1;" :: Statement.T) @?= "write count+1;\n"
+    , testCase "Parse if" $ toString (fromString "if x then skip; else x:=0-x;" :: Statement.T) @?= "if x then\n\tskip;\nelse\n\tx := 0-x;\n"
+    , testCase "Parse while" $ toString (fromString "while n do n:=n-1;" :: Statement.T) @?= "while n do\n\tn := n-1;\n"
+    , testCase "Empty begin end" $ toString (fromString "begin end" :: Statement.T) @?= "begin\nend\n"
+    , testCase "Simple begin end" $ toString (fromString "begin skip; end" :: Statement.T) @?= "begin\n\tskip;\nend\n"
+    , testCase "Parse begin end given case" $ toString (fromString "begin read x ; x := x + 1 ; write x; end" :: Statement.T) @?= "begin\n\tread x;\n\tx := x+1;\n\twrite x;\nend\n"
+    , testCase "Begin simple inc" $ toString (fromString "begin x:=0; x:=x+1; end" :: Statement.T) @?= "begin\n\tx := 0;\n\tx := x+1;\nend\n"
+    , testCase "Simple faculty" $ toString (fromString s9 :: Statement.T) @?= "while n do\n\tbegin\n\t\tfac := fac*n;\n\t\tn := n-1;\n\tend\n"
+    , testCase "Read faculty" $ toString (fromString  ("begin read n; fac:=1; " ++ s9 ++ " write fac; end") :: Statement.T) @?= "begin\n\tread n;\n\tfac := 1;\n\twhile n do\n\t\tbegin\n\t\t\tfac := fac*n;\n\t\t\tn := n-1;\n\t\tend\n\twrite fac;\nend\n"
+    , testCase "Parse comment" $ toString (fromString "-- Edward Blom\n" :: Statement.T) @?= "-- Edward Blom\n"
+  ]
+
+statementTest :: TestTree
+statementTest = testGroup "All unit tests for Statement.hs"
+  [
+      parseTest
+  ]
+
+------------------------------------------------------------
+
 allTests = testGroup "All tests"
   [
       parserTests
     , exprTests
+    , statementTest
   ]
 
 main = defaultMain allTests

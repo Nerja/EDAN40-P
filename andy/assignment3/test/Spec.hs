@@ -121,6 +121,7 @@ parseTest = testGroup "all unit tests for Task 3.b"
     , testCase "Simple faculty" $ toString (fromString s9 :: Statement.T) @?= "while n do\n\tbegin\n\t\tfac := fac*n;\n\t\tn := n-1;\n\tend\n"
     , testCase "Read faculty" $ toString (fromString  ("begin read n; fac:=1; " ++ s9 ++ " write fac; end") :: Statement.T) @?= "begin\n\tread n;\n\tfac := 1;\n\twhile n do\n\t\tbegin\n\t\t\tfac := fac*n;\n\t\t\tn := n-1;\n\t\tend\n\twrite fac;\nend\n"
     , testCase "Parse comment" $ toString (fromString "-- Edward Blom\n" :: Statement.T) @?= "-- Edward Blom\n"
+    , testCase "Comment with skip" $ toString (fromString "begin -- Edward Blom \nskip; end" :: Statement.T) @?= "begin\n\t-- Edward Blom \n\tskip;\nend\n"
   ]
 
 statementTest :: TestTree

@@ -35,6 +35,9 @@ buildRead v = Read v
 write = accept "write" -# Expr.parse #- require ";" >-> buildWrite
 buildWrite e = Write e
 
+comment = accept "--" -# iter (char ? (/= '\n')) #- require "\n" >-> buildComment
+buildComment c = Comment c
+
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec (Assignment v e: stmts) dict input = exec stmts (Dictionary.insert (v, Expr.value e dict) dict) input
 
@@ -56,6 +59,8 @@ exec (Read v: stmts) dict input = exec stmts (Dictionary.insert (v, head input) 
 
 exec (Write e: stmts) dict input = Expr.value e dict: exec stmts dict input
 
+exec (Comment c: stmts) dict input = exec stmts dict input
+
 stringify :: String -> Statement -> String
 stringify ind (Assignment v e) = ind ++ v ++ " := " ++ toString e ++ ";\n"
 stringify ind (If e t s) = ind ++ "if " ++ toString e ++ " then\n" ++ stringify (ind ++ "\t") t
@@ -66,7 +71,8 @@ stringify ind (Statements ss) = ind ++ "begin\n" ++ concatMap (stringify (ind ++
 stringify ind (While e s) = ind ++ "while " ++ toString e ++ " do\n" ++ stringify (ind ++ "\t") s
 stringify ind (Read v) = ind ++ "read " ++ v ++ ";\n"
 stringify ind (Write e) = ind ++ "write " ++ toString e ++ ";\n"
+stringify ind (Comment c) = ind ++ "-- " ++ c ++ "\n"
 
 instance Parse Statement where
-  parse = assignment ! ifStmt ! skip ! statements ! while ! readStmt ! write
+  parse = assignment ! ifStmt ! skip ! statements ! while ! readStmt ! write ! comment
   toString = stringify ""

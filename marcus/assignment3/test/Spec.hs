@@ -7,6 +7,8 @@ import Test.Tasty.HUnit
 import Control.Monad
 import Control.Exception
 import Test.Hspec
+import Program
+import TestPrograms
 
 assertException :: (Exception e, Eq e) => e -> IO a -> IO ()
 assertException ex action =
@@ -121,12 +123,27 @@ exprTest = testGroup "All unit tests for Expr.hs"
     valueTest
   ]
 
+execTest :: TestTree
+execTest = testGroup "All unit tests for exec in Program.hs"
+  [
+      testCase "Given program p applied to input [3,16]" $ Program.exec (fromString p ::Program.T) [3,16] @?= [3,6,9,12,15]
+    , testCase "Given program p1 applied to input [1024, 2]" $ Program.exec (fromString p1 ::Program.T) [1024,2] @?= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10000000000]
+    --, testCase "toString of parsed program p should be pretty" $ toString (fromString p ::Program.T) @?= pPretty
+  ]
+
+programTest :: TestTree
+programTest = testGroup "All unit tests for Program.hs"
+  [
+    execTest
+  ]
+
 unitTests :: TestTree
 unitTests = testGroup "All unit tests"
   [
       parserTest
     , exprTest
     , statementTest
+    , programTest
   ]
 
 main = defaultMain unitTests

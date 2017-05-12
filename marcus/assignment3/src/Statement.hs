@@ -41,7 +41,7 @@ exec (If cond thenStmts elseStmts: stmts) dict input =
 
 exec (me@(While cond whileStmts) : stmts) dict input =
     if (Expr.value cond dict)>0
-    then exec (me : stmts) dict input
+    then exec (whileStmts : me : stmts) dict input
     else exec (stmts) dict input
 
 exec (Skip : stmts) dict input = exec stmts dict input
@@ -50,7 +50,9 @@ exec (Statements blockStmts : stmts) dict input = exec (blockStmts ++ stmts) dic
 
 exec (Read var : stmts) dict input = exec stmts (Dictionary.insert (var, head input) dict) $ tail input
 
-exec (Write exp : stmts) dict input = (Expr.value exp dict) : exec stmts dict input 
+exec (Write exp : stmts) dict input = (Expr.value exp dict) : exec stmts dict input
+
+exec [] _ _ = []
 
 stringify :: Statement -> String
 stringify (Assignment str e) = str ++ " := " ++ toString e ++ ";"
@@ -63,5 +65,5 @@ stringify (Statements xs) = "begin " ++ concatMap ((++" ").toString) xs ++ "end"
 
 tryAllParsers = parseAssignment ! parseSkip ! parseRead ! parseWrite ! parseIf ! parseWhile ! parseBeginEnd
 instance Parse Statement where
-  parse = tryAllParsers ! error "Unable to parse"
+  parse = tryAllParsers
   toString = stringify

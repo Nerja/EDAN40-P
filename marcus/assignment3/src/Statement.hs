@@ -12,7 +12,8 @@ data Statement =
     Skip |
     Statements [Statement] |
     Read String |
-    Write Expr.T
+    Write Expr.T |
+    Comment String
     deriving Show
 
 parseAssignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
@@ -29,6 +30,8 @@ buildIf ((e,t),el) = If e t el
 parseWhile = accept "while" -# Expr.parse #- require "do" # parse >-> \(e, st) -> While e st
 
 parseBeginEnd = accept "begin" -# (iter tryAllParsers) #- require "end" >-> Statements
+
+parseComment = accept "--" -# iter (char ? (/= '\n')) #- require "\n" >-> Comment
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec (Assignment var exp : stmts) dict input = exec stmts (Dictionary.insert (var,expVal) dict) input
@@ -52,8 +55,12 @@ exec (Read var : stmts) dict input = exec stmts (Dictionary.insert (var, head in
 
 exec (Write exp : stmts) dict input = (Expr.value exp dict) : exec stmts dict input
 
+exec (Comment _ : stmts) dict input = exec stmts dict input
+
 exec [] _ _ = []
 
+-- | Takes an indention level and a statement and returns a string
+--   representing the statement.
 stringify :: String -> Statement -> String
 stringify ind (Assignment str e) = ind ++ str ++ " := " ++ toString e ++ ";" ++ "\n"
 stringify ind (Skip) = ind ++ "skip;" ++ "\n"
@@ -62,8 +69,9 @@ stringify ind (Write e) = ind ++ "write " ++ toString e ++ ";" ++ "\n"
 stringify ind (If e th el) = ind ++ "if " ++ toString e ++ " then\n" ++ stringify (ind++"\t") th ++ ind ++ "else\n" ++ stringify (ind++"\t") el
 stringify ind (While e st) = ind ++ "while " ++ toString e ++ " do\n" ++ stringify (ind++"\t") st
 stringify ind (Statements xs) = ind ++ "begin\n" ++ concatMap (stringify (ind++"\t")) xs ++ ind ++ "end\n"
+stringify ind (Comment sen) = ind ++ "-- " ++ sen ++ "\n"
 
-tryAllParsers = parseAssignment ! parseSkip ! parseRead ! parseWrite ! parseIf ! parseWhile ! parseBeginEnd
+tryAllParsers = parseAssignment ! parseSkip ! parseRead ! parseWrite ! parseIf ! parseWhile ! parseBeginEnd ! parseComment
 instance Parse Statement where
   parse = tryAllParsers
   toString = stringify ""

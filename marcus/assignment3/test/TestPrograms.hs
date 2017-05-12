@@ -1,5 +1,6 @@
 module TestPrograms (
   p
+, pComment
 , p1
 , p4
 , pPretty
@@ -13,6 +14,20 @@ p = ("\
 \  begin\
 \    if m - m/k*k then\
 \      skip;\
+\    else\
+\      write m;\
+\    m := m + 1;\
+\  end")
+
+pComment = ("\
+\read k;\
+\read n;\
+\-- Hi, Hej\n\
+\m := 1;\
+\while n-m do\
+\  begin\
+\    if m - m/k*k then\
+\      -- Skip same as just comment\n\
 \    else\
 \      write m;\
 \    m := m + 1;\
@@ -40,7 +55,7 @@ p1 = ("\
 p4 = ("\
 \read a;\
 \read b;\
-\-- a comment\
+\-- a comment\n\
 \s := 3;\
 \while a do\
 \  begin\

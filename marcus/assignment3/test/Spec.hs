@@ -95,6 +95,21 @@ valueTest = testGroup "All unit tests for value"
     , testCase "Add some vars" $ testValue "x-y-y" @?= (-3)
     , testCase "Div by zero" $ evaluate (testValue "1337 + 1336/0 - 10") `shouldThrow` anyException
     , testCase "Undef var" $ evaluate (testValue "1337 + k - 10") `shouldThrow` anyException
+    , testCase "Simple pow" $ testValue "2^3" @?= 8
+    , testCase "Pow with mult 3*2^3" $ testValue "3*2^3" @?= 24
+    , testCase "Pow with mult reverse" $ testValue "2^3*3" @?= 24
+    , testCase "Pow with mult paran" $ testValue "(3*2)^3" @?= 216
+    , testCase "Pow with mult paran reverse" $ testValue "2^(3*3)" @?= 512
+  ]
+
+parseExprTest :: TestTree
+parseExprTest = testGroup "all unit tests for parsing expr"
+  [
+      testCase "Parse simple pow" $ toString (fromString "2^3" :: Expr.T) @?= "2^3"
+    , testCase "Parse pow with mult" $ toString (fromString "3*2^3" :: Expr.T) @?= "3*2^3"
+    , testCase "Parse pow with mult reverse" $ toString (fromString "2^3*3" :: Expr.T) @?= "2^3*3"
+    , testCase "Parse pow with paran" $ toString (fromString "(3*2)^3" :: Expr.T) @?= "(3*2)^3"
+    , testCase "Parse pow with paran reverse" $ toString (fromString "2^(3*3)" :: Expr.T) @?= "2^(3*3)"
   ]
 
 parseTest :: TestTree
@@ -109,6 +124,7 @@ parseTest = testGroup "all unit tests fr Task 3.b"
     , testCase "Empty begin end" $ toString (fromString "begin end" :: Statement.T) @?= "begin\nend\n"
     , testCase "Simple begin end" $ toString (fromString "begin skip; end" :: Statement.T) @?= "begin\n\tskip;\nend\n"
     , testCase "Parse begin end given case" $ toString (fromString "begin read x ; x := x + 1 ; write x; end" :: Statement.T) @?= "begin\n\tread x;\n\tx := x+1;\n\twrite x;\nend\n"
+    , testCase "Parse comment" $ toString (fromString "-- Edward Blom\n" :: Statement.T) @?= "-- Edward Blom\n"
   ]
 
 statementTest :: TestTree
@@ -120,7 +136,8 @@ statementTest = testGroup "All unit tests for Statement.hs"
 exprTest :: TestTree
 exprTest = testGroup "All unit tests for Expr.hs"
   [
-    valueTest
+      valueTest
+    , parseExprTest
   ]
 
 execTest :: TestTree
@@ -132,6 +149,10 @@ execTest = testGroup "All unit tests for exec in Program.hs"
     , testCase "toString of parsed program p1 should be pretty" $ toString (fromString p1 ::Program.T) @?= "read n;\nread b;\nm := 1;\ns := 0;\np := 1;\nwhile n do\n\tbegin\n\t\tq := n/b;\n\t\tr := n-q*b;\n\t\twrite r;\n\t\ts := p*r+s;\n\t\tp := p*10;\n\t\tn := q;\n\tend\nwrite s;\n"
     , testCase "the toString of parsed p1 should be the same as toString of (parsing a toString)" $ toString (fromString p1 ::Program.T) @?= toString (fromString (toString (fromString p1 ::Program.T)) ::Program.T)
     , testCase "the toString of parsed p should be the same as toString of (parsing a toString)" $ toString (fromString p ::Program.T) @?= toString (fromString (toString (fromString p ::Program.T)) ::Program.T)
+    , testCase "Given program p applied to input [3,16], program with comment" $ Program.exec (fromString pComment ::Program.T) [3,16] @?= [3,6,9,12,15]
+    , testCase "Given program p4 applied to input [4,4], program with comment" $ Program.exec (fromString p4 ::Program.T) [4,4] @?= [64, 16, 27, 8, 8, 4, 1, 2, 0]
+    , testCase "toString of parsed program p4 should be pretty" $ toString (fromString p4 ::Program.T) @?= "read a;\nread b;\n-- a comment\ns := 3;\nwhile a do\n\tbegin\n\t\tc := a^s;\n\t\td := 2^a;\n\t\twrite c;\n\t\twrite d;\n\t\ta := a-1;\n\tend\nwrite a;\n"
+
   ]
 
 programTest :: TestTree

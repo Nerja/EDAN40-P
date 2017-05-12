@@ -30,6 +30,7 @@ import Data.Maybe
 
 data Expr = Num Integer | Var String | Add Expr Expr
        | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+       | Pow Expr Expr
          deriving Show
 
 type T = Expr
@@ -42,21 +43,26 @@ var = word >-> Var
 
 num = number >-> Num
 
-mulOp = lit '*' >-> (\ _ -> Mul) !
-        lit '/' >-> (\ _ -> Div)
+mulOp = lit '*' >-> const Mul !
+        lit '/' >-> const Div
 
-addOp = lit '+' >-> (\ _ -> Add) !
-        lit '-' >-> (\ _ -> Sub)
+addOp = lit '+' >-> const Add !
+        lit '-' >-> const Sub
 
 bldOp e (oper,e') = oper e e'
+
+powOp = lit '^' >-> const Pow
 
 factor = num !
          var !
          lit '(' -# expr #- lit ')' !
          err "illegal factor"
 
-term' e = mulOp # factor >-> bldOp e #> term' ! return e
-term = factor #> term'
+term' e = mulOp # powTerm >-> bldOp e #> term' ! return e
+term = powTerm #> term'
+
+powTerm' e = powOp # factor >-> bldOp e ! return e
+powTerm = factor #> powTerm'
 
 expr' e = addOp # term >-> bldOp e #> expr' ! return e
 expr = term #> expr'
@@ -69,7 +75,8 @@ shw prec (Var v) = v
 shw prec (Add t u) = parens (prec>5) (shw 5 t ++ "+" ++ shw 5 u)
 shw prec (Sub t u) = parens (prec>5) (shw 5 t ++ "-" ++ shw 6 u)
 shw prec (Mul t u) = parens (prec>6) (shw 6 t ++ "*" ++ shw 6 u)
-shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
+shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 6 u)  -- var 7 sista innan
+shw prec (Pow t u) = parens (prec>7) (shw 7 t ++ "^" ++ shw 7 u)
 
 -- | Takes an expression and a dictionary with variable values
 --   and evaluates the expression.
@@ -81,6 +88,7 @@ value (Sub e1 e2) dict = value e1 dict - value e2 dict
 value (Div e1 e2) dict = if (e2val == 0) then error "Expr.value: division by 0" else value e1 dict `quot` e2val
   where e2val = value e2 dict
 value (Mul e1 e2) dict = value e1 dict * value e2 dict
+value (Pow b e) dict = value b dict ^ value e dict
 
 instance Parse Expr where
     parse = expr

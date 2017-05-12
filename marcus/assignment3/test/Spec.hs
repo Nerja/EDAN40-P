@@ -100,15 +100,15 @@ valueTest = testGroup "All unit tests for value"
 parseTest :: TestTree
 parseTest = testGroup "all unit tests fr Task 3.b"
   [
-      testCase "Parse assignment" $ toString (fromString "count := 0;" :: Statement.T) @?= "count := 0;"
-    , testCase "Parse skip" $ toString (fromString "skip;" :: Statement.T) @?= "skip;"
-    , testCase "Parse read" $ toString (fromString "read count;" :: Statement.T) @?= "read count;"
-    , testCase "Parse write" $ toString (fromString "write count+1;" :: Statement.T) @?= "write count+1;"
-    , testCase "Parse if" $ toString (fromString "if x then skip; else x:=0-x;" :: Statement.T) @?= "if x then skip; else x := 0-x;"
-    , testCase "Parse while" $ toString (fromString "while n do n:=n-1;" :: Statement.T) @?= "while n do n := n-1;"
-    , testCase "Empty begin end" $ toString (fromString "begin end" :: Statement.T) @?= "begin end"
-    , testCase "Simple begin end" $ toString (fromString "begin skip; end" :: Statement.T) @?= "begin skip; end"
-    , testCase "Parse begin end given case" $ toString (fromString "begin read x ; x := x + 1 ; write x; end" :: Statement.T) @?= "begin read x; x := x+1; write x; end"
+      testCase "Parse assignment" $ toString (fromString "count := 0;" :: Statement.T) @?= "count := 0;\n"
+    , testCase "Parse skip" $ toString (fromString "skip;" :: Statement.T) @?= "skip;\n"
+    , testCase "Parse read" $ toString (fromString "read count;" :: Statement.T) @?= "read count;\n"
+    , testCase "Parse write" $ toString (fromString "write count+1;" :: Statement.T) @?= "write count+1;\n"
+    , testCase "Parse if" $ toString (fromString "if x then skip; else x:=0-x;" :: Statement.T) @?= "if x then\n\tskip;\nelse\n\tx := 0-x;\n"
+    , testCase "Parse while" $ toString (fromString "while n do n:=n-1;" :: Statement.T) @?= "while n do\n\tn := n-1;\n"
+    , testCase "Empty begin end" $ toString (fromString "begin end" :: Statement.T) @?= "begin\nend\n"
+    , testCase "Simple begin end" $ toString (fromString "begin skip; end" :: Statement.T) @?= "begin\n\tskip;\nend\n"
+    , testCase "Parse begin end given case" $ toString (fromString "begin read x ; x := x + 1 ; write x; end" :: Statement.T) @?= "begin\n\tread x;\n\tx := x+1;\n\twrite x;\nend\n"
   ]
 
 statementTest :: TestTree
@@ -128,7 +128,10 @@ execTest = testGroup "All unit tests for exec in Program.hs"
   [
       testCase "Given program p applied to input [3,16]" $ Program.exec (fromString p ::Program.T) [3,16] @?= [3,6,9,12,15]
     , testCase "Given program p1 applied to input [1024, 2]" $ Program.exec (fromString p1 ::Program.T) [1024,2] @?= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10000000000]
-    --, testCase "toString of parsed program p should be pretty" $ toString (fromString p ::Program.T) @?= pPretty
+    , testCase "toString of parsed program p should be pretty" $ toString (fromString p ::Program.T) @?= "read k;\nread n;\nm := 1;\nwhile n-m do\n\tbegin\n\t\tif m-m/k*k then\n\t\t\tskip;\n\t\telse\n\t\t\twrite m;\n\t\tm := m+1;\n\tend\n"
+    , testCase "toString of parsed program p1 should be pretty" $ toString (fromString p1 ::Program.T) @?= "read n;\nread b;\nm := 1;\ns := 0;\np := 1;\nwhile n do\n\tbegin\n\t\tq := n/b;\n\t\tr := n-q*b;\n\t\twrite r;\n\t\ts := p*r+s;\n\t\tp := p*10;\n\t\tn := q;\n\tend\nwrite s;\n"
+    , testCase "the toString of parsed p1 should be the same as toString of (parsing a toString)" $ toString (fromString p1 ::Program.T) @?= toString (fromString (toString (fromString p1 ::Program.T)) ::Program.T)
+    , testCase "the toString of parsed p should be the same as toString of (parsing a toString)" $ toString (fromString p ::Program.T) @?= toString (fromString (toString (fromString p ::Program.T)) ::Program.T)
   ]
 
 programTest :: TestTree

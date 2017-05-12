@@ -8,7 +8,7 @@ newtype T = Program [Statement.T]
 
 instance Parse T where
   parse = iter Statement.parse >-> Program
-  toString (Program stmts) = concatMap ((++"\n").Statement.toString) stmts
+  toString (Program stmts) = concatMap (Statement.toString) stmts
 
 exec :: T -> [Integer] -> [Integer]
 exec (Program stmts) = Statement.exec stmts Dictionary.empty

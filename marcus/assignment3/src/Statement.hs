@@ -54,16 +54,16 @@ exec (Write exp : stmts) dict input = (Expr.value exp dict) : exec stmts dict in
 
 exec [] _ _ = []
 
-stringify :: Statement -> String
-stringify (Assignment str e) = str ++ " := " ++ toString e ++ ";"
-stringify (Skip) = "skip;"
-stringify (Read name) = "read " ++ name ++ ";"
-stringify (Write e) = "write " ++ toString e ++ ";"
-stringify (If e th el) = "if " ++ toString e ++ " then " ++ toString th ++ " else " ++ toString el
-stringify (While e st) = "while " ++ toString e ++ " do " ++ toString st
-stringify (Statements xs) = "begin " ++ concatMap ((++" ").toString) xs ++ "end"
+stringify :: String -> Statement -> String
+stringify ind (Assignment str e) = ind ++ str ++ " := " ++ toString e ++ ";" ++ "\n"
+stringify ind (Skip) = ind ++ "skip;" ++ "\n"
+stringify ind (Read name) = ind ++ "read " ++ name ++ ";" ++ "\n"
+stringify ind (Write e) = ind ++ "write " ++ toString e ++ ";" ++ "\n"
+stringify ind (If e th el) = ind ++ "if " ++ toString e ++ " then\n" ++ stringify (ind++"\t") th ++ ind ++ "else\n" ++ stringify (ind++"\t") el
+stringify ind (While e st) = ind ++ "while " ++ toString e ++ " do\n" ++ stringify (ind++"\t") st
+stringify ind (Statements xs) = ind ++ "begin\n" ++ concatMap (stringify (ind++"\t")) xs ++ ind ++ "end\n"
 
 tryAllParsers = parseAssignment ! parseSkip ! parseRead ! parseWrite ! parseIf ! parseWhile ! parseBeginEnd
 instance Parse Statement where
   parse = tryAllParsers
-  toString = stringify
+  toString = stringify ""

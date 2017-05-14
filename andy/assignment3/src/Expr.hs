@@ -79,7 +79,7 @@ value (Sub e1 e2) dict = value e1 dict - value e2 dict
 value (Mul e1 e2) dict = value e1 dict * value e2 dict
 value (Div e1 e2) dict = case value e2 dict of
                          0 -> error "Expr.value: division by 0"
-                         otherwise -> value e1 dict `div` value e2 dict
+                         _ -> value e1 dict `div` value e2 dict
 
 instance Parse Expr where
     parse = expr

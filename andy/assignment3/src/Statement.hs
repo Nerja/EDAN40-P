@@ -23,26 +23,22 @@ buildIf ((e, t), s) = If e t s
 
 skip = accept "skip;" >-> const Skip
 
-statements = accept "begin" -# (iter parse) #- require "end" >-> buildStatements
-buildStatements ss = Statements ss
+statements = accept "begin" -# iter parse #- require "end" >-> Statements
 
 while = accept "while" -# Expr.parse #- require "do" # parse >-> buildWhile
 buildWhile (e, s) = While e s
 
-readStmt = accept "read" -# word #- require ";" >-> buildRead
-buildRead v = Read v
+readStmt = accept "read" -# word #- require ";" >-> Read
 
-write = accept "write" -# Expr.parse #- require ";" >-> buildWrite
-buildWrite e = Write e
+write = accept "write" -# Expr.parse #- require ";" >-> Write
 
-comment = accept "--" -# iter (char ? (/= '\n')) #- require "\n" >-> buildComment
-buildComment c = Comment c
+comment = accept "--" -# iter (char ? (/= '\n')) #- require "\n" >-> Comment
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec (Assignment v e: stmts) dict input = exec stmts (Dictionary.insert (v, Expr.value e dict) dict) input
 
 exec (If cond thenStmts elseStmts: stmts) dict input =
-    if (Expr.value cond dict)>0
+    if Expr.value cond dict > 0
     then exec (thenStmts: stmts) dict input
     else exec (elseStmts: stmts) dict input
 
@@ -51,7 +47,7 @@ exec (Skip: stmts) dict input = exec stmts dict input
 exec (Statements ss: stmts) dict input = exec (ss ++ stmts) dict input
 
 exec (While cond s: stmts) dict input =
-  if (Expr.value cond dict)>0
+  if Expr.value cond dict > 0
   then exec (s: While cond s: stmts) dict input
   else exec stmts dict input
 
@@ -65,7 +61,7 @@ stringify :: String -> Statement -> String
 stringify ind (Assignment v e) = ind ++ v ++ " := " ++ toString e ++ ";\n"
 stringify ind (If e t s) = ind ++ "if " ++ toString e ++ " then\n" ++ stringify (ind ++ "\t") t
                            ++ ind ++ "else\n" ++ stringify (ind ++ "\t") s
-stringify ind (Skip) = ind ++ "skip;\n"
+stringify ind Skip = ind ++ "skip;\n"
 stringify ind (Statements ss) = ind ++ "begin\n" ++ concatMap (stringify (ind ++ "\t")) ss
                                 ++ ind ++ "end\n"
 stringify ind (While e s) = ind ++ "while " ++ toString e ++ " do\n" ++ stringify (ind ++ "\t") s

@@ -35,6 +35,7 @@ write = accept "write" -# Expr.parse #- require ";" >-> Write
 comment = accept "--" -# iter (char ? (/= '\n')) #- require "\n" >-> Comment
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
+exec [] _ _ = []
 exec (Assignment v e: stmts) dict input = exec stmts (Dictionary.insert (v, Expr.value e dict) dict) input
 
 exec (If cond thenStmts elseStmts: stmts) dict input =

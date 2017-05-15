@@ -29,7 +29,7 @@ import qualified Dictionary
 import Data.Maybe
 
 data Expr = Num Integer | Var String | Add Expr Expr
-       | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+       | Sub Expr Expr | Mul Expr Expr | Div Expr Expr | Pow Expr Expr
          deriving Show
 
 type T = Expr
@@ -41,6 +41,8 @@ term', expr' :: Expr -> Parser Expr
 var = word >-> Var
 
 num = number >-> Num
+
+powOp = lit '^' >-> (\ _ -> Pow)
 
 mulOp = lit '*' >-> (\ _ -> Mul) !
         lit '/' >-> (\ _ -> Div)
@@ -55,8 +57,11 @@ factor = num !
          lit '(' -# expr #- lit ')' !
          err "illegal factor"
 
-term' e = mulOp # factor >-> bldOp e #> term' ! return e
-term = factor #> term'
+powTerm' e = powOp # factor >-> bldOp e #> powTerm' ! return e
+powTerm = factor #> powTerm'
+
+term' e = mulOp # powTerm >-> bldOp e #> term' ! return e
+term = powTerm #> term'
 
 expr' e = addOp # term >-> bldOp e #> expr' ! return e
 expr = term #> expr'
@@ -70,6 +75,7 @@ shw prec (Add t u) = parens (prec>5) (shw 5 t ++ "+" ++ shw 5 u)
 shw prec (Sub t u) = parens (prec>5) (shw 5 t ++ "-" ++ shw 6 u)
 shw prec (Mul t u) = parens (prec>6) (shw 6 t ++ "*" ++ shw 6 u)
 shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
+shw prec (Pow t u) = parens (prec>6) (shw 7 t ++ "^" ++ shw 7 u)
 
 value :: Expr -> Dictionary.T String Integer -> Integer
 value (Num n) _ = n
@@ -80,6 +86,7 @@ value (Mul e1 e2) dict = value e1 dict * value e2 dict
 value (Div e1 e2) dict = case value e2 dict of
                          0 -> error "Expr.value: division by 0"
                          _ -> value e1 dict `div` value e2 dict
+value (Pow e1 e2) dict = value e1 dict ^ value e2 dict
 
 instance Parse Expr where
     parse = expr

@@ -75,8 +75,8 @@ shw prec (Var v) = v
 shw prec (Add t u) = parens (prec>5) (shw 5 t ++ "+" ++ shw 5 u)
 shw prec (Sub t u) = parens (prec>5) (shw 5 t ++ "-" ++ shw 6 u)
 shw prec (Mul t u) = parens (prec>6) (shw 6 t ++ "*" ++ shw 6 u)
-shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 6 u)  -- var 7 sista innan
-shw prec (Pow t u) = parens (prec>7) (shw 7 t ++ "^" ++ shw 7 u)
+shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
+shw prec (Pow t u) = parens (prec>7) (shw 8 t ++ "^" ++ shw 7 u)
 
 -- | Takes an expression and a dictionary with variable values
 --   and evaluates the expression.

@@ -110,6 +110,10 @@ parseExprTest = testGroup "all unit tests for parsing expr"
     , testCase "Parse pow with mult reverse" $ toString (fromString "2^3*3" :: Expr.T) @?= "2^3*3"
     , testCase "Parse pow with paran" $ toString (fromString "(3*2)^3" :: Expr.T) @?= "(3*2)^3"
     , testCase "Parse pow with paran reverse" $ toString (fromString "2^(3*3)" :: Expr.T) @?= "2^(3*3)"
+    , testCase "Nested divs denominator" $ toString (fromString "(2/(10/3))" :: Expr.T) @?= "2/(10/3)"
+    , testCase "Nested divs numerator" $ toString (fromString "((2/10)/3)" :: Expr.T) @?= "2/10/3"
+    , testCase "Nested pows exp" $ toString (fromString "(2^(4^3))" :: Expr.T) @?= "2^4^3"
+    , testCase "Nested pows base" $ toString (fromString "((2^4)^3)" :: Expr.T) @?= "(2^4)^3"
   ]
 
 parseTest :: TestTree

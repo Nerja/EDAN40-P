@@ -53,3 +53,7 @@ script:
   - stack haddock
   - stack test
   - stack exec doctest src/Parser.hs
+  - cd ../../assignment3
+  - stack build
+  - stack haddock
+  - stack test

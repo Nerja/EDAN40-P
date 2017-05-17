@@ -120,6 +120,7 @@ parseExprTest = testGroup "all unit tests for parsing expr"
     , testCase "Nested pows exp" $ toString (fromString "(2^(4^3))" :: Expr.T) @?= "2^4^3"
     , testCase "Nested pows base" $ toString (fromString "((2^4)^3)" :: Expr.T) @?= "(2^4)^3"
     , testCase "pows" $ toString (fromString "2^4^3" :: Expr.T) @?= "2^4^3"
+    , testCase "Many pows" $ toString (fromString "2^3^2^1^2" :: Expr.T) @?= "2^3^2^1^2"
   ]
 
 parseTest :: TestTree

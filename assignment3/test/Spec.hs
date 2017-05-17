@@ -104,6 +104,7 @@ valueTest = testGroup "All unit tests for value"
     , testCase "Pow with mult paran" $ testValue "(3*2)^3" @?= 216
     , testCase "Pow with mult paran reverse" $ testValue "2^(3*3)" @?= 512
     , testCase "Three pow" $ testValue "2^3^2" @?= 512
+    , testCase "Many pow" $ testValue "2^3^2^1^2" @?= 512
   ]
 
 parseExprTest :: TestTree
